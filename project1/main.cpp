@@ -86,7 +86,6 @@ void run() {
 
   if (total_flow >= required_flow) {
     control_output(false);
-    delay(10);
     reset = true;
   }
 
