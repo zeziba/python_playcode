@@ -1,6 +1,14 @@
+#!/usr/bin/env python
+
+"""
+    Created by cengen on 3/24/18.
+"""
+
 import tkinter as tk
 from math import sin, cos
 from random import randint
+import asyncio
+from time import sleep
 
 pi = 3.1415926535897932384626433832795028841971693993751058209749445923
 
@@ -8,53 +16,54 @@ width = 800
 height = 600
 
 r = 2
-c_x = randint(100, width - 100)
-c_y = randint(100, height - 100)
 
-inc = pi / 120
+inc = pi / 60
 
 dt = 100
-r_max = c_x ** 2 + c_y ** 2
-r_inc = 4
 
 master = tk.Tk()
 w = tk.Canvas(master, width=width, height=height)
 
+
 def map_(x, in_min, in_max, out_min, out_max):
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-def draw():
-    global r
-    global w
-    if r ** 2 > (c_x ** 2 + c_y ** 2):
-        return
 
-    i = -pi
-    while i < pi:
-        
-        x = r * cos(i)
-        y = r * sin(i)
+def draw(event, window, radius, r_inc=4, inc_=pi / 60):
+    c_x = event.x
+    c_y = event.y
+    r_max = c_x ** 2 + c_y ** 2
+    r_max /= 2
+
+    inc_list = []
+    ii = -pi
+    while ii < pi:
+        inc_list.append(ii)
+        ii += inc_
+
+    gen_delta = lambda ij, r_: (r_ * cos(ij),
+                                r_ * sin(ij),
+                                int(map_(ij, -pi, pi, 0, 255)),
+                                int(map_(sin(map_(r_, 0, r_max, 0, 255)), -1, 1, 0, 255)),
+                                int(map_(cos(r_), -1, 1, 0, 255)))
+
+    def draw_point(window_, x_, y_, dx_, dy_, dz_):
         outline = "#{}{}{}"
+        window_.create_rectangle((x_, y_, x_, y_),
+                                 outline=outline.format("%02x" % dx_, "%02x" % dy_, "%02x" % dz_))
 
-        dx = int(map_(i, -pi, pi, 0, 255))
-        if dx < 0:
-            dx *= -1
-        dy = int(map_(sin(map_(r, 0, r_max, 0, 255)), -1, 1, 0, 255))
-        dz = int(map_(cos(r), -1, 1, 0, 255))
+    while radius ** 2 < r_max:
+        points = [gen_delta(i, radius) for i in inc_list]
+        list(map(lambda point:
+                 draw_point(window_=window, x_=c_x+point[0],
+                            y_=c_y+point[1], dx_=point[2], dy_=point[3], dz_=point[4]), points))
 
-        try:
-            w.create_rectangle((x + c_x, y + c_y, x + c_x, y + c_y), outline=outline.format("%02x" % dx, "%02x" % dy, "%02x" % dz))
-        except Exception:
-            print(dx, dy, dz)
-            exit()
+        radius += r_inc
 
-        i += inc
-
-    r += r_inc
-    w.after(dt, draw)
 
 if __name__ == "__main__":
     w.pack()
 
-    w.after(100, draw)
+    w.bind("<Button-1>", lambda event: draw(event, w, randint(2, 12), randint(2, 7)), pi/randint(20, 120))
+    master.protocol("WM_DELETE_WINDOW", exit)
     master.mainloop()
