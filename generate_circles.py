@@ -32,7 +32,7 @@ def map_(x, in_min, in_max, out_min, out_max):
 def draw(event, window, radius, r_inc=4, inc_=pi / 60):
     c_x = event.x
     c_y = event.y
-    r_max = c_x ** 2 + c_y ** 2
+    r_max = ((width // 2) - c_x) ** 2 + ((height // 2) - c_y) ** 2
     r_max /= 2
 
     inc_list = []
@@ -53,7 +53,7 @@ def draw(event, window, radius, r_inc=4, inc_=pi / 60):
                                  outline=outline.format("%02x" % dx_, "%02x" % dy_, "%02x" % dz_))
 
     while radius ** 2 < r_max:
-        points = [gen_delta(i, radius) for i in inc_list]
+        points = list(map(lambda i: gen_delta(i, radius), inc_list))
         list(map(lambda point:
                  draw_point(window_=window, x_=c_x+point[0],
                             y_=c_y+point[1], dx_=point[2], dy_=point[3], dz_=point[4]), points))
@@ -64,6 +64,6 @@ def draw(event, window, radius, r_inc=4, inc_=pi / 60):
 if __name__ == "__main__":
     w.pack()
 
-    w.bind("<Button-1>", lambda event: draw(event, w, randint(2, 12), randint(2, 7)), pi/randint(20, 120))
+    w.bind("<Button-1>", lambda event: draw(event, w, randint(2, 12), randint(2, 7)), pi/randint(6, 250))
     master.protocol("WM_DELETE_WINDOW", exit)
     master.mainloop()
