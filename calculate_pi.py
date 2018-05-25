@@ -33,6 +33,7 @@ tk.Label(master, textvariable=v).pack()
 
 v.set(out.format(0))
 
+
 def add_point():
     global count
     global i_count
@@ -62,6 +63,7 @@ def add_point():
             i_count  += 1
         v.set(out.format(4 * i_count / count))
     master.after(tdelta, add_point)
+
 
 if __name__ == "__main__":
     w.pack()
